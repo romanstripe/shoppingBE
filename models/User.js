@@ -1,5 +1,8 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const jwt = require('jsonwebtoken');
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const userSchema = Schema(
   {
@@ -18,6 +21,13 @@ userSchema.methods.toJson = function () {
   delete obj.updatedAt;
   delete obj.createdAt;
   return obj;
+};
+
+userSchema.methods.generateToken = async function () {
+  const token = await jwt.sign({ _id: this.id }, JWT_SECRET_KEY, {
+    expiresIn: '1d',
+  });
+  return token;
 };
 
 const User = mongoose.model('User', userSchema);
