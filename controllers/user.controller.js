@@ -28,4 +28,18 @@ userController.createUser = async (req, res) => {
   }
 };
 
+userController.getUser = async (req, res) => {
+  try {
+    const { userId } = req;
+    const user = await User.findById(userId);
+    if (user) {
+      return res.status(200).json({ status: 'Success', user: user.toJson() });
+      //user schema function 에서 비밀번호 등 정보 삭제된 걸로 호출하려 toJson 사용
+    }
+    throw new Error('Invalid token!');
+  } catch (error) {
+    res.status(400).json({ status: 'Failed', error: error.message });
+  }
+};
+
 module.exports = userController;
