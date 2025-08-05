@@ -11,4 +11,6 @@ router.post(
 );
 //admin 인지 확인하기
 
+router.get('/', productController.getProducts);
+
 module.exports = router;
