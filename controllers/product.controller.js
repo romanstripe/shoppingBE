@@ -15,6 +15,11 @@ productController.createProduct = async (req, res) => {
       stock,
       status,
     } = req.body;
+
+    if (!image || image.trim() === '') {
+      return res.status(400).json({ message: 'Image is mandatory!' });
+    }
+
     const product = new Product({
       sku,
       name,
@@ -27,6 +32,7 @@ productController.createProduct = async (req, res) => {
       status,
     });
     await product.save();
+
     res.status(200).json({ status: 'Success', product });
   } catch (error) {
     res.status(400).json({ status: 'Failed', error: error.message });
