@@ -67,4 +67,43 @@ productController.getProducts = async (req, res) => {
   }
 };
 
+productController.updateProducts = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const {
+      sku,
+      name,
+      size,
+      image,
+      price,
+      description,
+      category,
+      stock,
+      status,
+    } = req.body;
+    const product = await Product.findByIdAndUpdate(
+      { _id: productId },
+      { sku, name, size, image, price, description, category, stock, status },
+      { new: true }
+    );
+    if (!product) throw new Error('Item does not exist!');
+    res.status(200).json({ status: 'Success', data: product });
+  } catch (error) {
+    res.status(400).json({ status: 'Failed', error: error.message });
+  }
+};
+
+productController.deleteProducts = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findByIdAndUpdate(
+      { _id: productId },
+      { isdeleted: true },
+      { new: true }
+    );
+  } catch (error) {
+    res.status(400).json({ status: 'Failed', error: error.message });
+  }
+};
+
 module.exports = productController;
