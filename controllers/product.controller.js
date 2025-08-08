@@ -44,7 +44,12 @@ productController.getProducts = async (req, res) => {
   try {
     const { page, name } = req.query;
     //여러 옵션이 늘어날 걸 대비해 분리
-    const cond = name ? { name: { $regex: name, $options: 'i' } } : {};
+
+    const cond = { isDeleted: false };
+
+    if (name) {
+      cond.name = { $regex: name, $options: 'i' };
+    }
     //regex -> 문자열 포함도 결과에 나오게 하려고
     let query = Product.find(cond);
     let response = { status: 'success' };
@@ -98,9 +103,21 @@ productController.deleteProducts = async (req, res) => {
     const productId = req.params.id;
     const product = await Product.findByIdAndUpdate(
       { _id: productId },
-      { isdeleted: true },
+      { isDeleted: true },
       { new: true }
     );
+    if (!product) throw new Error('Item does not exist!');
+    res.status(200).json({ status: 'Success', data: product });
+  } catch (error) {
+    res.status(400).json({ status: 'Failed', error: error.message });
+  }
+};
+
+productController.getProductDetail = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product || product.isDeleted) throw new Error('Not found');
+    res.status(200).json({ status: 'Success', data: product });
   } catch (error) {
     res.status(400).json({ status: 'Failed', error: error.message });
   }
