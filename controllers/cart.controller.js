@@ -120,7 +120,6 @@ cartController.updateItemQty = async (req, res) => {
 cartController.getItemQty = async (req, res) => {
   try {
     const userId = req.userId;
-    const productId = req.params.id;
 
     //1. 유저 아이디를 통해 카트 찾기
     let cart = await Cart.findOne({ userId: userId });
@@ -129,7 +128,7 @@ cartController.getItemQty = async (req, res) => {
     }
 
     //2. 카트에 아이템 있는지 찾기
-    const allQty = await cart.items.length;
+    const allQty = cart.items.length;
 
     if (allQty === 0) throw new Error('Not found');
     res.status(200).json({ status: 'Success', data: allQty });
