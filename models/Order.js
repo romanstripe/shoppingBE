@@ -11,6 +11,7 @@ const orderSchema = Schema(
     userId: { type: mongoose.ObjectId, ref: User, required: true },
     totalPrice: { type: Number, default: 0, required: true },
     status: { type: String, default: 'preparing' },
+    orderNum: { type: String },
     items: [
       {
         productId: { type: mongoose.ObjectId, ref: Product, required: true },

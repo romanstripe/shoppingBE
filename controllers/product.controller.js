@@ -133,30 +133,39 @@ productController.checkItemStock = async (item) => {
       message: `${product.name}의 ${item.size} 재고가 부족합니다. `,
     };
   }
-
-  //재고가 충분하면 비우기
-  const newStock = { ...product.stock };
-  newStock[item.size] -= item.qty;
-  product.stock = newStock;
-
-  await product.save();
-  return { isVerify: true };
+  return { isVerify: true, product };
 };
 
 productController.checkItemListStock = async (itemList) => {
   const insufficientStockList = [];
+  const stockUpdates = []; // 재고 있고 수량이 재고보다 작거나 같은 것들 저장
+
   await Promise.all(
-    //비동기 처리가 여러 개일 때 동시에 시작하게 함
-    //직렬 -> 병렬의 느낌
     itemList.map(async (item) => {
       const stockCheck = await productController.checkItemStock(item);
-      if (stockCheck.isVerify === false) {
+      if (!stockCheck.isVerify) {
+        //재고 없는 것들 저장
         insufficientStockList.push({ item, message: stockCheck.message });
+      } else {
+        //재고 있는 것들 저장
+        stockUpdates.push({ product: stockCheck.product, item });
       }
-      return stockCheck;
     })
   );
-  return insufficientStockList;
+
+  //재고 없는 게 하나라도 있으면 어떤 게 없는지 알려주기 위해 없는 것들 배열 보냄
+  if (insufficientStockList.length > 0) return insufficientStockList;
+
+  await Promise.all(
+    stockUpdates.map(async ({ product, item }) => {
+      const newStock = { ...product.stock };
+      newStock[item.size] -= item.qty;
+      product.stock = newStock;
+      await product.save();
+    })
+  );
+
+  return []; //재고 있으니 빈 배열 보냄
 };
 
 module.exports = productController;
