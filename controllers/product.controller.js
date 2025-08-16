@@ -42,7 +42,7 @@ productController.createProduct = async (req, res) => {
 
 productController.getProducts = async (req, res) => {
   try {
-    const { page, name } = req.query;
+    const { page, name, sort } = req.query;
     //여러 옵션이 늘어날 걸 대비해 분리
 
     const cond = { isDeleted: false };
@@ -53,6 +53,14 @@ productController.getProducts = async (req, res) => {
     //regex -> 문자열 포함도 결과에 나오게 하려고
     let query = Product.find(cond);
     let response = { status: 'success' };
+
+    let sortOption = {};
+    if (sort === 'lowPrice') sortOption.price = 1;
+    else if (sort === 'highPrice') sortOption.price = -1;
+    else if (sort === 'latest') sortOption.createdAt = -1; // 최신순
+    else sortOption.createdAt = 1; // 기본: 오래된순/추천순
+
+    query.sort(sortOption);
 
     if (page) {
       query.skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE); //skip넘기려는 페이지수 limit 보여주는페이지수
